@@ -1,8 +1,9 @@
+
 <!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>VMS NILAM - Packing System</title>
+  <title>VMS NILAM - Packing System (Apps Script UI)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
@@ -229,7 +230,7 @@
 
 <script>
 /* ========= Config ========= */
-const API_URL = "https://script.google.com/macros/s/AKfycbxyp2yVTWztY2PopM-jNTA1cFquSYnmgVa6am5C78x_uQqiWOpl0WJEHLh5U9aMTqQ-/exec"; // optional external URL
+const API_URL = "https://script.google.com/macros/s/AKfycbw4KM_kwbcmNsoicb7vk1-kEn5gZjjfAfY_eCAybaKPwZM41uMtNsIzNAEqVYpbab-y/exec"; // optional external URL
 const CHUNK_SIZE = 512 * 1024; // 512 KB (smaller chunks reduce per-call processing time)
 const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 const AUTO_REFRESH = { stats: 4000, leaderboard: 8000, videos: 12000 };
@@ -316,10 +317,6 @@ function setLoginMsg(txt, severity) {
 }
 function setAwbMsg(txt, cls) {
   const el = document.getElementById('awbMsg');
-  if (!el) {
-    console.warn('awbMsg not found');
-    return;
-  }
   el.innerText = txt || '';
   el.className = cls || '';
 }
