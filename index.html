@@ -11,7 +11,7 @@
       --bg:#0f1720;
       --card:#0b1220;
       --muted:#9fb0c6;
-      --accent:#ffd88a;
+      --accent:#87CEEB; /* skyblue accent */
       --danger:#ff6b6b;
       --success:#8bff9a;
     }
@@ -22,6 +22,8 @@
       background:var(--bg);
       color:#e6eef6;
       font-family:Arial,Helvetica,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
     header{
       background:#071029;
@@ -37,6 +39,8 @@
       min-height: calc(100vh - 72px);
       box-sizing: border-box;
     }
+
+    /* ===== Card / Layout ===== */
     .card {
       background: var(--card);
       padding: 12px 16px;
@@ -50,33 +54,41 @@
     input, select, button {
       padding:6px;
       border-radius:4px;
-      border:1px solid #444;
-      background:#121b2b;
+      border:1px solid #284a6b;
+      background:#081422;
       color:#e6eef6;
       font-size:14px;
     }
-    input:focus, select:focus, button:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,216,138,0.06); }
+    input:focus, select:focus, button:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(135,206,235,0.06); }
     table { width:100%; border-collapse:collapse; margin-top:4px; }
-    table th, table td { padding:6px 8px; text-align:left; border-bottom:1px solid #333; font-size:13px; vertical-align:middle; }
+    table th, table td { padding:6px 8px; text-align:left; border-bottom:1px solid #0f2230; font-size:13px; vertical-align:middle; }
     .timer { font-weight:bold; color:var(--accent); }
     small.muted { color:var(--muted); font-size:12px; }
     .muted { color:var(--muted); }
     .status-msg { font-size:13px; margin-top:8px; }
     .danger { color:var(--danger); }
     .ok { color:var(--success); }
+
+    /* inline spinner */
     .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.08); border-top-color:var(--accent); border-radius:50%; animation:spin 0.9s linear infinite; vertical-align:middle; margin-right:6px; }
     @keyframes spin { to { transform:rotate(360deg); } }
+
     .invisible { display:none !important; }
     .link-btn { background:transparent; border:1px solid #284a6b; padding:6px 8px; color:var(--accent); border-radius:4px; cursor:pointer; }
     a.small { font-size:13px; color:var(--accent); text-decoration:none; }
+    .small-muted { color:var(--muted); font-size:12px; }
     footer.note { color:var(--muted); font-size:12px; text-align:center; margin-top:8px; }
-    video { width:100%; border-radius:4px; background:#000; }
+
+    /* small responsive tweaks */
+    @media (max-width:720px){
+      .row{flex-direction:column;}
+      .col{min-width:100%;}
+    }
   </style>
 </head>
 <body>
-  <header>VMS NILAM - Packing System</header>
+  <header>VMS NILAM - Packing System (Apps Script UI)</header>
   <div class="wrap">
-
     <!-- LOGIN -->
     <div id="loginCard" class="card" role="region" aria-label="Login">
       <h3>Login</h3>
@@ -101,81 +113,106 @@
 
     <!-- MAIN UI -->
     <div id="mainUI" class="card invisible" aria-hidden="true">
-
-      <!-- Dashboard + Leaderboard + AWB -->
-      <div class="card row">
+      <!-- Dashboard + Leaderboard + AWB Search -->
+      <div class="card row" role="region" aria-label="Dashboard and Leaderboard">
         <div class="col">
           <h4>📊 Dashboard</h4>
           <div>Packed Today: <strong id="statPacked">0</strong></div>
           <div>AWBs Processed: <strong id="statAwb">0</strong></div>
           <div class="actions" style="margin-top:8px">
             <button id="btnRefreshStats" type="button" class="link-btn">Refresh</button>
+            <button id="btnPerformance" type="button" class="link-btn">Load Performance</button>
+            <button id="btnAiAnalysis" type="button" class="link-btn">AI Speed Analysis</button>
+            <small class="muted" style="margin-left:8px">Auto-refresh enabled</small>
           </div>
         </div>
-        <div class="col">
+        <div class="col" aria-label="Leaderboard">
           <h4>🏆 Leaderboard</h4>
           <div style="max-height:220px;overflow:auto">
             <table><thead><tr><th>Employee</th><th>Count</th></tr></thead>
             <tbody id="leaderboardBody"></tbody></table>
           </div>
         </div>
-        <div class="col">
+        <div class="col" aria-label="Search AWB">
           <h4>🔎 Search AWB</h4>
           <div class="row">
             <div style="flex:1">
-              <input id="searchAwb" placeholder="scan or type AWB" />
+              <label for="searchAwb">Search AWB</label>
+              <input id="searchAwb" name="searchAwb" type="text" placeholder="scan or type AWB" autocomplete="off" />
             </div>
-            <div><button id="btnSearchAwb" type="button">Search</button></div>
+            <div style="display:flex;align-items:flex-end"><button id="btnSearchAwb" type="button">Search</button></div>
           </div>
           <div id="searchResults" style="margin-top:8px" role="status" aria-live="polite"></div>
         </div>
       </div>
 
       <!-- Camera & Recording -->
-      <div class="card row">
+      <div class="card row" role="region" aria-label="Recording and Upload">
         <div style="flex:1;min-width:320px">
           <h4>🎥 Camera & Recording</h4>
-          <div>Employee: <strong id="loggedUser"></strong> <span id="roleBadge" class="muted"></span></div>
+          <div>Employee: <strong id="loggedUser"></strong> <span id="roleBadge" class="muted" style="margin-left:6px"></span></div>
 
           <div class="actions" style="margin-top:8px">
-            <button id="btnStartCam">Start Camera</button>
-            <button id="btnStopCam">Stop Camera</button>
-            <button id="btnStartRec">Start Recording</button>
-            <button id="btnStopRec">Stop Recording</button>
-            <button id="btnUpload">Upload</button>
+            <button id="btnStartCam" type="button">Start Camera</button>
+            <button id="btnStopCam" type="button">Stop Camera</button>
+            <button id="btnStartRec" type="button">Start Recording</button>
+            <button id="btnStopRec" type="button">Stop Recording</button>
+            <button id="btnUpload" type="button">Upload</button>
           </div>
 
           <div style="margin-top:8px;max-width:520px">
-            <input id="awbInput" placeholder="Scan AWB / Manual Order" />
-            <div id="awbMsg" class="status-msg" role="status" aria-live="polite"></div>
+            <label>AWB / Manual Order No (scan or type)
+              <input id="awbInput" name="awbInput" type="text" placeholder="Scan barcode or type, press Enter to start recording" autocomplete="off" inputmode="numeric" aria-describedby="awbHelp awbMsg" />
+            </label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+              <small id="awbHelp" class="muted">Scan barcode or type order number then press Enter</small>
+              <div id="awbMsg" style="margin-left:6px" role="status" aria-live="polite"></div>
+            </div>
             <div style="margin-top:8px">Recording: <span id="recTimer" class="timer">00:00</span></div>
+            <div><small class="muted">Instant barcode scan mode: scanner input auto-detects and auto-starts</small></div>
           </div>
         </div>
 
         <div style="flex:0 0 320px;min-width:240px">
-          <video id="preview" autoplay muted playsinline></video>
-          <div style="margin-top:8px"><small class="muted">Recording preview</small></div>
+          <video id="preview" autoplay muted playsinline style="width:100%;max-width:320px;border-radius:4px;background:#000;"></video>
+          <div style="margin-top:8px"><small class="muted">Recording preview (low-res for faster upload)</small></div>
         </div>
       </div>
 
       <!-- Admin -->
-      <div id="adminBlock" class="card invisible">
+      <div id="adminBlock" class="card invisible" aria-hidden="true">
         <h4>👨‍💼 Admin Panel</h4>
         <div class="row">
           <div class="col">
-            <label>New User</label><input id="newUser" /><label>Password</label><input id="newPass" type="password" />
-            <label>Role</label><select id="newRole"><option value="user">user</option><option value="admin">admin</option></select>
-            <button id="btnCreateUser">Create</button>
+            <h5>Create User</h5>
+            <label for="newUser">Username</label>
+            <input id="newUser" name="newUser" type="text" placeholder="username" autocomplete="username" />
+            <label for="newPass">Password</label>
+            <input id="newPass" name="newPass" type="password" placeholder="password" autocomplete="new-password" />
+            <label for="newRole">Role</label>
+            <select id="newRole" name="newRole">
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </select>
+            <div style="margin-top:8px"><button id="btnCreateUser" type="button">Create</button></div>
           </div>
           <div class="col">
-            <label>Update Password</label><input id="updUser" /><label>New Password</label><input id="updPass" type="password" />
-            <button id="btnUpdPass">Update</button>
+            <h5>Update Password</h5>
+            <label for="updUser">Username</label>
+            <input id="updUser" name="updUser" type="text" placeholder="username" autocomplete="username" />
+            <label for="updPass">New Password</label>
+            <input id="updPass" name="updPass" type="password" placeholder="new password" autocomplete="new-password" />
+            <div style="margin-top:8px"><button id="btnUpdPass" type="button">Update</button></div>
+          </div>
+          <div class="col">
+            <h5>Performance</h5>
+            <div id="perfArea" style="max-height:220px;overflow:auto"></div>
           </div>
         </div>
       </div>
 
       <!-- Videos -->
-      <div id="videosList" class="card">
+      <div id="videosList" class="card" role="region" aria-label="Recent videos">
         <h4>Recent Videos</h4>
         <div style="max-height:260px;overflow:auto">
           <table>
@@ -185,116 +222,457 @@
         </div>
       </div>
 
-      <footer class="note">Built for Apps Script backend · Keep recordings short (&lt;60s)</footer>
+      <!-- AI Analysis -->
+      <div id="aiPanel" class="card invisible" aria-hidden="true">
+        <h4>🧠 AI Speed Analysis</h4>
+        <div id="aiArea"></div>
+      </div>
+
+      <footer class="note">Built for Apps Script backend · Keep recordings short (recommend &lt; 60s)</footer>
     </div>
   </div>
 
 <script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/a/macros/nilamind.com/s/AKfycbyjtL72R7iAsF4QbE9Q-WQlkimArEOO_mLA2_rDOZbfmoXVArkxlUsbGSjrkGxVzas1/exec"; // Apps Script web app exec URL
-const CHUNK_SIZE = 512*1024; // 512 KB
-const MAX_FILE_SIZE = 200*1024*1024; // 200MB
+/* ========= Config ========= */
+const API_URL = "https://script.google.com/a/macros/nilamind.com/s/AKfycbyjtL72R7iAsF4QbE9Q-WQlkimArEOO_mLA2_rDOZbfmoXVArkxlUsbGSjrkGxVzas1/exec"; // replace with your deploy URL if external
+const CHUNK_SIZE = 512 * 1024; // 512 KB
+const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
+const AUTO_REFRESH = { stats: 4000, leaderboard: 8000, videos: 12000 };
 
-/* ================= STATE ================= */
+/* ========= State ========= */
 const STATE = {
-  token:null, username:null, role:null, mediaStream:null,
-  recorder:null, chunks:[], recording:false, recordStart:null,
-  timerHandle:null, autoHandles:[], awbDebounce:null
+  token: null,
+  username: null,
+  role: null,
+  mediaStream: null,
+  recorder: null,
+  chunks: [],
+  recording: false,
+  recordStart: null,
+  timerHandle: null,
+  autoHandles: [],
+  awbDebounceTimer: null
 };
 
-/* ================= UTILITIES ================= */
-function setVisible(el, v){ if(!el) return; el.style.display=v?'block':'none'; el.classList.toggle('invisible',!v); el.setAttribute('aria-hidden',!v); }
-function setLoginMsg(msg,cls){ const el=document.getElementById('loginMsg'); el.innerText=msg||''; el.className='status-msg'+(cls?' '+cls:''); }
-function setAwbMsg(msg,cls){ const el=document.getElementById('awbMsg'); el.innerText=msg||''; el.className=cls||''; }
-function startTimer(){ const el=document.getElementById('recTimer'); STATE.timerHandle=setInterval(()=>{ if(!STATE.recordStart) return; const s=Math.floor((Date.now()-STATE.recordStart)/1000); el.innerText=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },300); }
-function stopTimer(){ if(STATE.timerHandle){ clearInterval(STATE.timerHandle); STATE.timerHandle=null; } document.getElementById('recTimer').innerText='00:00'; }
-function escapeHtml(str){ if(!str && str!==0) return ''; return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+/* ========= Utility UI helpers ========= */
+function setVisible(el, visible) {
+  if (!el) return;
+  if (visible) {
+    el.classList.remove('invisible');
+    el.setAttribute('aria-hidden', 'false');
+    el.style.removeProperty('display');
+  } else {
+    el.classList.add('invisible');
+    el.setAttribute('aria-hidden', 'true');
+    el.style.display = 'none';
+  }
+}
+function setLoginMsg(txt, severity) {
+  const el = document.getElementById('loginMsg');
+  el.innerText = txt || '';
+  el.className = 'status-msg' + (severity ? ' ' + severity : '');
+}
+function setAwbMsg(txt, cls) {
+  const el = document.getElementById('awbMsg');
+  if (!el) return;
+  el.innerText = txt || '';
+  el.className = cls || '';
+}
+function startSpinnerOn(btn) {
+  if (!btn) return;
+  btn.disabled = true;
+  if (btn.dataset._spinner) return;
+  const s = document.createElement('span'); s.className = 'spinner'; s.setAttribute('aria-hidden','true');
+  btn.dataset._spinner = '1';
+  btn.insertBefore(s, btn.firstChild);
+}
+function stopSpinnerOn(btn) {
+  if (!btn) return;
+  btn.disabled = false;
+  const s = btn.querySelector('.spinner');
+  if (s) s.remove();
+  delete btn.dataset._spinner;
+}
+function escapeHtml(str){ if (!str && str !== 0) return ''; return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
 
-/* ================= API WRAPPER ================= */
-async function api(action,data={},opts={timeout:15000}){
-  const body=JSON.stringify({...data,action});
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),opts.timeout);
-  const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,signal:ctrl.signal});
-  clearTimeout(timer);
-  if(!res.ok) throw new Error(res.statusText);
-  return await res.json();
+/* ========= API wrapper ========= */
+function isAppsScript() {
+  return typeof google !== "undefined" && google.script && google.script.run;
 }
 
-/* ================= LOGIN ================= */
-document.getElementById('loginForm').addEventListener('submit',async e=>{
+function api(action, data = {}, opts = { timeout: 15000 }) {
+  if (isAppsScript()) {
+    return new Promise((resolve, reject) => {
+      try {
+        google.script.run
+          .withSuccessHandler(res => resolve(res))
+          .withFailureHandler(err => reject(err))
+          .handleApi({ action, ...data });
+      } catch (e) { reject(e); }
+    });
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), opts.timeout);
+  return fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain to avoid preflight
+    body: JSON.stringify({ action, ...data }),
+    signal: controller.signal
+  }).then(async res => {
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('Network response not ok: ' + res.status);
+    const text = await res.text();
+    try { return JSON.parse(text); } catch(e) { return { status:'error', message:'Invalid JSON from server', raw:text }; }
+  });
+}
+
+/* ========= LOGIN ========= */
+document.getElementById('loginForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  const u=document.getElementById('username').value.trim();
-  const p=document.getElementById('password').value;
-  if(!u||!p){ setLoginMsg('username/password required','danger'); return; }
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  if (!u || !p) { setLoginMsg('username/password required','danger'); return; }
   setLoginMsg('Signing in...');
-  try{
-    const r=await api('login',{username:u,password:p});
-    if(r.status==='success'){
-      STATE.token=r.token; STATE.username=r.username; STATE.role=r.role;
-      document.getElementById('loggedUser').innerText=STATE.username;
-      document.getElementById('roleBadge').innerText=STATE.role==='admin'?'admin':'';
-      setVisible(document.getElementById('loginCard'),false);
-      setVisible(document.getElementById('mainUI'),true);
-      if(STATE.role==='admin') setVisible(document.getElementById('adminBlock'),true);
-      loadStats(); loadLeaderboard(); loadRecentVideos();
-    } else setLoginMsg(r.message||'Login failed','danger');
-  }catch(e){ setLoginMsg('Login error','danger'); console.error(e);}
-});
-
-/* ================= STATS / LEADERBOARD / VIDEOS ================= */
-async function loadStats(){ try{ const r=await api('getStats',{token:STATE.token}); if(r){ document.getElementById('statPacked').innerText=r.packedToday||0; document.getElementById('statAwb').innerText=r.awbsProcessed||0; } }catch(e){console.error(e);} }
-async function loadLeaderboard(){ try{ const r=await api('getLeaderboard',{token:STATE.token}); const body=document.getElementById('leaderboardBody'); body.innerHTML=''; if(r&&Array.isArray(r.leaderboard)) r.leaderboard.forEach(it=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(it.employee)}</td><td>${escapeHtml(it.count)}</td>`; body.appendChild(tr); }); }catch(e){console.error(e);} }
-async function loadRecentVideos(){ try{ const r=await api('getVideos',{token:STATE.token}); const body=document.getElementById('videosBody'); body.innerHTML=''; if(r&&r.status==='success'){ r.videos.slice().reverse().slice(0,50).forEach(v=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(v.employee)}</td><td>${escapeHtml(v.awb||'')}</td><td>${escapeHtml(v.startTime||'')}</td><td>${Number(v.durationSec)||0}</td><td><a href="${v.fileUrl}" target="_blank">view</a></td>`; body.appendChild(tr); }); } }catch(e){console.error(e);} }
-
-/* ================= AWB DUPLICATE CHECK ================= */
-document.getElementById('awbInput').addEventListener('blur',()=>{ if(STATE.awbDebounce) clearTimeout(STATE.awbDebounce); STATE.awbDebounce=setTimeout(checkAwb,200); });
-async function checkAwb(){ const v=(document.getElementById('awbInput').value||'').trim(); if(!v){ setAwbMsg('',''); return; } try{ const r=await api('checkAwb',{awb:v,token:STATE.token}); if(r.exists) setAwbMsg('Duplicate AWB!','danger'); else setAwbMsg('AWB OK','ok'); }catch(e){ setAwbMsg('AWB check error','danger'); } }
-
-/* ================= CAMERA / RECORDING ================= */
-const preview=document.getElementById('preview');
-document.getElementById('btnStartCam').addEventListener('click',async()=>{
-  if(STATE.mediaStream) return;
-  try{ STATE.mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,frameRate:15},audio:true}); preview.srcObject=STATE.mediaStream; }catch(e){alert('Camera permission required');}
-});
-document.getElementById('btnStopCam').addEventListener('click',()=>{
-  if(!STATE.mediaStream) return;
-  STATE.mediaStream.getTracks().forEach(t=>t.stop());
-  STATE.mediaStream=null; preview.srcObject=null;
-});
-document.getElementById('btnStartRec').addEventListener('click',()=>{
-  if(!STATE.mediaStream) { alert('Start camera first'); return; }
-  if(STATE.recording) { alert('Already recording'); return; }
-  STATE.chunks=[]; STATE.recordStart=new Date();
-  STATE.recorder=new MediaRecorder(STATE.mediaStream,{mimeType:'video/webm;codecs=vp8'}); 
-  STATE.recorder.ondataavailable=e=>{ if(e.data&&e.data.size) STATE.chunks.push(e.data); };
-  STATE.recorder.onstop=()=>{ STATE.recording=false; stopTimer(); };
-  STATE.recorder.start(1000); STATE.recording=true; startTimer(); setAwbMsg('Recording...','ok');
-});
-document.getElementById('btnStopRec').addEventListener('click',()=>{ if(STATE.recorder&&STATE.recording){ STATE.recorder.stop(); STATE.recording=false; setAwbMsg('Recording stopped',''); } });
-
-/* ================= UPLOAD ================= */
-document.getElementById('btnUpload').addEventListener('click',async()=>{
-  if(!STATE.token) return alert('Login required');
-  if(!STATE.chunks.length) return alert('No recording found');
-  const awb=(document.getElementById('awbInput').value||'').trim();
-  if(!awb&& !confirm('No AWB entered. Upload as manual?')) return;
-  try{
-    const chk=await api('checkAwb',{awb,token:STATE.token});
-    if(chk.exists) return alert('Duplicate AWB detected!');
-  }catch(e){ console.warn('AWB check failed',e); }
-  const blob=new Blob(STATE.chunks,{type:'video/webm'}); if(blob.size>MAX_FILE_SIZE) return alert('Video too large');
-  const uploadId=`${STATE.username}_${Date.now()}`, totalChunks=Math.ceil(blob.size/CHUNK_SIZE);
-  try{
-    for(let i=0;i<totalChunks;i++){
-      const slice=blob.slice(i*CHUNK_SIZE,(i+1)*CHUNK_SIZE);
-      const b64=await new Promise(res=>{ const fr=new FileReader(); fr.onloadend=()=>res(fr.result.split(',')[1]||''); fr.readAsDataURL(slice); });
-      await api('uploadChunk',{token:STATE.token,uploadId,index:i,total:totalChunks,data:b64},{timeout:30000});
+  const btn = document.getElementById('btnLogin');
+  startSpinnerOn(btn);
+  try {
+    const r = await api('login',{ username: u, password: p });
+    stopSpinnerOn(btn);
+    if (r && r.status === 'success') {
+      STATE.token = r.token; STATE.username = r.username; STATE.role = r.role;
+      document.getElementById('loggedUser').innerText = STATE.username;
+      document.getElementById('roleBadge').innerText = STATE.role === 'admin' ? 'admin' : '';
+      setLoginMsg('');
+      setVisible(document.getElementById('loginCard'), false);
+      setVisible(document.getElementById('mainUI'), true);
+      if (STATE.role === 'admin') setVisible(document.getElementById('adminBlock'), true);
+      // load initial data and start auto refresh
+      await loadStats(); await loadLeaderboard(); await loadRecentVideos();
+      STATE.autoHandles.push(setInterval(loadStats, AUTO_REFRESH.stats));
+      STATE.autoHandles.push(setInterval(loadLeaderboard, AUTO_REFRESH.leaderboard));
+      STATE.autoHandles.push(setInterval(loadRecentVideos, AUTO_REFRESH.videos));
+    } else {
+      setLoginMsg(r && r.message ? r.message : 'login failed','danger');
     }
-    await api('finalizeUpload',{token:STATE.token,uploadId,filename:`${STATE.username}_${awb||'manual'}_${new Date().toISOString().replace(/[:.]/g,'-')}.webm`,awb,startTime:STATE.recordStart.toISOString(),endTime:new Date().toISOString()});
-    alert('Upload success'); STATE.chunks=[]; STATE.recordStart=null; stopTimer(); document.getElementById('awbInput').value=''; setAwbMsg('',''); loadStats(); loadLeaderboard(); loadRecentVideos();
-  }catch(e){ console.error(e); alert('Upload failed'); setAwbMsg('Upload failed','danger'); }
+  } catch (err) {
+    stopSpinnerOn(btn);
+    setLoginMsg('Login error: ' + String(err),'danger');
+    console.error('login error', err);
+  }
 });
+
+/* ========= STATS / LEADERBOARD / VIDEOS ========= */
+async function loadStats(){
+  try{
+    const r = await api('getStats', { token: STATE.token || '' });
+    if (r && typeof r.packedToday !== 'undefined') {
+      document.getElementById('statPacked').innerText = r.packedToday;
+      document.getElementById('statAwb').innerText = r.awbsProcessed;
+    } else {
+      console.warn('getStats unexpected response', r);
+    }
+  } catch(e){ console.error('loadStats', e); }
+}
+
+async function loadLeaderboard(){
+  try{
+    const r = await api('getLeaderboard', { token: STATE.token || '' });
+    const body = document.getElementById('leaderboardBody'); body.innerHTML = '';
+    if (r && Array.isArray(r.leaderboard)) {
+      r.leaderboard.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(it.employee)}</td><td>${escapeHtml(it.count)}</td>`;
+        body.appendChild(tr);
+      });
+    } else {
+      console.warn('getLeaderboard unexpected', r);
+    }
+  } catch(e){ console.error('loadLeaderboard', e); }
+}
+
+async function loadRecentVideos(){
+  try{
+    const r = await api('getVideos', { token: STATE.token || '' });
+    const body = document.getElementById('videosBody'); body.innerHTML = '';
+    if (r && r.status === 'success' && Array.isArray(r.videos)) {
+      r.videos.slice().reverse().slice(0,50).forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(v.employee)}</td><td>${escapeHtml(v.awb||'')}</td><td>${escapeHtml(v.startTime||'')}</td><td>${Number(v.durationSec)||0}</td><td><a href="${v.fileUrl}" target="_blank" rel="noopener">view</a></td>`;
+        body.appendChild(tr);
+      });
+    } else {
+      console.warn('getVideos unexpected', r);
+    }
+  } catch(e){ console.error('loadRecentVideos', e); }
+}
+
+/* ========= SEARCH AWB (fixed) ========= */
+document.getElementById('btnSearchAwb').addEventListener('click', async ()=>{
+  const q = document.getElementById('searchAwb').value.trim();
+  const area = document.getElementById('searchResults');
+  area.innerHTML = '';
+  if (!q) return;
+  try{
+    // send as 'q' (backend expects params.q)
+    const r = await api('searchByAwb', { token: STATE.token || '', q });
+    if (r && r.status === 'success' && Array.isArray(r.results) && r.results.length) {
+      r.results.forEach(h => {
+        const div = document.createElement('div');
+        div.innerHTML = `<strong>${escapeHtml(h.awb)}</strong> by ${escapeHtml(h.employee)} — <a class="small" href="${h.fileUrl}" target="_blank" rel="noopener">view</a> (${h.durationSec||0}s)`;
+        area.appendChild(div);
+      });
+    } else {
+      area.innerText = 'No results';
+    }
+  } catch(e){
+    area.innerText = 'Search error: ' + String(e);
+    console.error('searchByAwb error', e);
+  }
+});
+
+/* ========= CAMERA / RECORDING ========= */
+const previewEl = document.getElementById('preview');
+document.getElementById('btnStartCam').addEventListener('click', startCamera);
+document.getElementById('btnStopCam').addEventListener('click', stopCamera);
+
+async function startCamera(){
+  if (STATE.mediaStream) return;
+  try {
+    const constraints = { video: { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 15 } }, audio: true };
+    const s = await navigator.mediaDevices.getUserMedia(constraints);
+    STATE.mediaStream = s;
+    previewEl.srcObject = s;
+  } catch(e){
+    alert('Camera permission required: ' + (e && e.message ? e.message : e));
+  }
+}
+function stopCamera(){
+  try {
+    if (!STATE.mediaStream) return;
+    STATE.mediaStream.getTracks().forEach(t=>t.stop());
+    STATE.mediaStream = null;
+    previewEl.srcObject = null;
+  } catch(e){ console.error('stopCamera', e); }
+}
+
+/* Recording helpers */
+document.getElementById('btnStartRec').addEventListener('click', startRecording);
+document.getElementById('btnStopRec').addEventListener('click', stopRecording);
+
+function startRecording(){
+  if (!STATE.mediaStream) { alert('Start camera first'); return; }
+  if (STATE.recording) { alert('Already recording'); return; }
+  STATE.chunks = [];
+  let options = { mimeType: 'video/webm;codecs=vp8', bitsPerSecond: 350000 };
+  try { STATE.recorder = new MediaRecorder(STATE.mediaStream, options); } catch(e) {
+    try { STATE.recorder = new MediaRecorder(STATE.mediaStream); } catch(e2) { alert('MediaRecorder unsupported'); return; }
+  }
+  STATE.recorder.ondataavailable = e => { if (e.data && e.data.size) STATE.chunks.push(e.data); };
+  STATE.recorder.onstop = ()=> { STATE.recording = false; clearInterval(STATE.timerHandle); STATE.timerHandle = null; };
+  STATE.recorder.start(1000); // ms timeslice
+  STATE.recording = true; STATE.recordStart = new Date();
+  startTimerDisplay();
+  setAwbMsg('Recording...','ok');
+}
+
+function stopRecording(){
+  if (STATE.recorder && STATE.recording) {
+    try { STATE.recorder.stop(); } catch(e){ console.warn('recorder stop error', e); }
+    STATE.recording = false;
+    setAwbMsg('Recording stopped. Click Upload.','');
+  }
+}
+
+/* Timer display */
+function startTimerDisplay(){
+  const el = document.getElementById('recTimer');
+  el.innerText = '00:00';
+  STATE.timerHandle = setInterval(()=>{
+    if (!STATE.recordStart) return;
+    const diff = Math.max(0, new Date().getTime() - new Date(STATE.recordStart).getTime());
+    const s = Math.floor(diff/1000);
+    const mm = String(Math.floor(s/60)).padStart(2,'0');
+    const ss = String(s%60).padStart(2,'0');
+    el.innerText = `${mm}:${ss}`;
+  }, 300);
+}
+function resetTimerDisplay(){ document.getElementById('recTimer').innerText = '00:00'; }
+
+/* ========= Instant Barcode Scan Mode (debounced) ========= */
+const awbInput = document.getElementById('awbInput');
+let scanStartTime = 0;
+awbInput.addEventListener('keydown', (ev) => { if (!scanStartTime) scanStartTime = Date.now(); });
+awbInput.addEventListener('input', (ev) => {
+  clearTimeout(STATE.awbDebounceTimer);
+  STATE.awbDebounceTimer = setTimeout(checkAwbDuplicate, 600);
+});
+awbInput.addEventListener('keypress', async (e) => {
+  if (e.key === 'Enter') {
+    const totalTime = Date.now() - (scanStartTime || Date.now());
+    const len = (awbInput.value || '').length;
+    const isScanner = (len >= 4 && totalTime < 700) || (len >= 8 && totalTime < 1200);
+    scanStartTime = 0;
+    if (isScanner) {
+      if (!STATE.mediaStream) await startCamera();
+      if (!STATE.recording) startRecording();
+      setTimeout(checkAwbDuplicate, 200);
+    } else {
+      if (!STATE.mediaStream) await startCamera();
+      if (!STATE.recording) startRecording();
+    }
+  }
+});
+awbInput.addEventListener('blur', ()=>{ clearTimeout(STATE.awbDebounceTimer); STATE.awbDebounceTimer = setTimeout(checkAwbDuplicate, 250); });
+
+async function checkAwbDuplicate(){
+  const v = (awbInput.value || '').trim();
+  if (!v) { setAwbMsg('',''); return; }
+  try {
+    const r = await api('checkAwb', { awb: v, token: STATE.token || '' });
+    if (r && r.exists) { setAwbMsg('Duplicate AWB detected! Do not upload.','danger'); }
+    else setAwbMsg('AWB OK','ok');
+  } catch(e) {
+    console.error('checkAwb error', e);
+    setAwbMsg('AWB check error','danger');
+  }
+}
+
+/* ========= UPLOAD (chunked) ========= */
+document.getElementById('btnUpload').addEventListener('click', uploadVideo);
+
+async function uploadVideo(){
+  if (!STATE.token) { alert('Login required'); return; }
+  if (!STATE.chunks || !STATE.chunks.length) { alert('No recording found'); return; }
+  const awb = (document.getElementById('awbInput').value || '').trim();
+  if (!awb && !confirm('No AWB entered. Upload as manual order?')) return;
+
+  // check duplicate
+  try {
+    const chk = await api('checkAwb', { awb, token: STATE.token || '' });
+    if (chk && chk.exists) { alert('Duplicate AWB detected. Do not upload.'); return; }
+  } catch(e) {
+    console.warn('awb check failed, proceeding with caution', e);
+  }
+
+  // assemble blob from chunks
+  const blob = new Blob(STATE.chunks, { type: 'video/webm' });
+  if (blob.size > MAX_FILE_SIZE) { alert('Video too large; please record shorter clip'); return; }
+
+  const uploadId = `${STATE.username || 'guest'}_${Date.now()}`;
+  const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
+
+  setAwbMsg('Uploading...', 'muted');
+  const uploadBtn = document.getElementById('btnUpload'); startSpinnerOn(uploadBtn);
+  try {
+    function blobSliceToBase64(slice) {
+      return new Promise(res => {
+        const fr = new FileReader();
+        fr.onloadend = ()=> {
+          const s = fr.result || '';
+          const b64 = s.split(',')[1] || '';
+          res(b64);
+        };
+        fr.readAsDataURL(slice);
+      });
+    }
+
+    for (let i=0;i<totalChunks;i++) {
+      const start = i * CHUNK_SIZE;
+      const end = Math.min(blob.size, (i+1)*CHUNK_SIZE);
+      const slice = blob.slice(start, end);
+      const b64 = await blobSliceToBase64(slice);
+      // upload chunk, await each to avoid overwhelming server
+      const res = await api('uploadChunk', { token: STATE.token, uploadId, index: i, data: b64 }, { timeout: 30000 });
+      if (!(res && (res.status === 'ok' || typeof res.index !== 'undefined'))) {
+        throw new Error('Chunk upload failed at ' + i + ': ' + JSON.stringify(res));
+      }
+      setAwbMsg(`Uploading chunk ${i+1}/${totalChunks}...`, 'muted');
+    }
+
+    // finalize
+    const filename = `${STATE.username || 'user'}_${awb||'manual'}_${new Date().toISOString().replace(/[:.]/g,'-')}.webm`;
+    const res2 = await api('finalizeUpload', { token: STATE.token, uploadId, filename, awb, startTime: STATE.recordStart ? new Date(STATE.recordStart).toISOString() : new Date().toISOString(), endTime: new Date().toISOString() }, { timeout: 60000 });
+    if (res2 && res2.status === 'success') {
+      alert('Upload success');
+      // reset
+      STATE.chunks = []; STATE.recorder = null; STATE.recordStart = null; resetTimerDisplay(); document.getElementById('awbInput').value = ''; setAwbMsg('','');
+      // refresh UI
+      await loadStats(); await loadLeaderboard(); await loadRecentVideos();
+    } else {
+      throw new Error('Finalize failed: ' + JSON.stringify(res2));
+    }
+  } catch(err) {
+    console.error('Upload error', err);
+    alert('Upload error: ' + (err && err.message ? err.message : String(err)));
+    setAwbMsg('Upload failed','danger');
+  } finally {
+    stopSpinnerOn(uploadBtn);
+  }
+}
+
+/* ========= ADMIN actions ========= */
+document.getElementById('btnCreateUser').addEventListener('click', async ()=>{
+  const u = document.getElementById('newUser').value.trim(); const p = document.getElementById('newPass').value.trim(); const r = document.getElementById('newRole').value;
+  if (!u||!p) { alert('username/password required'); return; }
+  try {
+    const res = await api('createUser', { token: STATE.token, username: u, password: p, role: r });
+    alert(JSON.stringify(res));
+  } catch(e){ alert('Create user error: ' + e); console.error(e); }
+});
+document.getElementById('btnUpdPass').addEventListener('click', async ()=>{
+  const u = document.getElementById('updUser').value.trim(); const p = document.getElementById('updPass').value.trim();
+  if (!u||!p) { alert('username/new password required'); return; }
+  try {
+    const res = await api('updatePassword', { token: STATE.token, username: u, password: p });
+    alert(JSON.stringify(res));
+  } catch(e){ alert('Update password error: ' + e); console.error(e); }
+});
+
+/* ========= Performance / AI ========= */
+document.getElementById('btnPerformance').addEventListener('click', async ()=>{
+  const area = document.getElementById('perfArea'); area.innerHTML = '';
+  try {
+    const r = await api('getPerformance', { token: STATE.token });
+    if (r && r.status === 'success' && Array.isArray(r.performance)) {
+      r.performance.forEach(p => {
+        const d = document.createElement('div');
+        d.innerHTML = `<strong>${escapeHtml(p.employee)}</strong>: total=${p.total}, avgDur=${p.avgDurationSec}s, today=${p.todayCount}`;
+        area.appendChild(d);
+      });
+    } else area.innerText = r && r.message ? r.message : 'no data';
+  } catch(e) { area.innerText = 'Error loading performance'; console.error(e); }
+});
+
+document.getElementById('btnAiAnalysis').addEventListener('click', async ()=>{
+  const area = document.getElementById('aiArea'); area.innerHTML = '';
+  try {
+    const r = await api('getAiAnalysis', { token: STATE.token });
+    setVisible(document.getElementById('aiPanel'), true);
+    if (r && r.status === 'success' && Array.isArray(r.analysis)) {
+      area.innerHTML = `<div>Global Avg Duration: <strong>${r.globalAvg}s</strong></div><div style="height:8px"></div>`;
+      r.analysis.forEach(a => {
+        const el = document.createElement('div');
+        el.innerHTML = `<strong>${escapeHtml(a.employee)}</strong>: avg=${a.avgDurationSec}s total=${a.total} ${a.flagSlow ? '<span style="color:#ffb3b3">⚠ slow</span>' : ''} (z=${a.zScore})`;
+        area.appendChild(el);
+      });
+    } else area.innerText = r && r.message ? r.message : 'no data';
+  } catch(e) { area.innerText = 'Error loading AI analysis'; console.error(e); }
+});
+
+/* ========= Cleanup ========= */
+window.addEventListener('beforeunload', ()=> {
+  try {
+    if (STATE.mediaStream) STATE.mediaStream.getTracks().forEach(t=>t.stop());
+    STATE.autoHandles.forEach(h=>clearInterval(h));
+    if (STATE.timerHandle) clearInterval(STATE.timerHandle);
+  } catch(e){}
+});
+
+/* ========= Init ========= */
+(function init(){
+  setVisible(document.getElementById('mainUI'), false);
+})();
 </script>
 </body>
 </html>
