@@ -1,9 +1,8 @@
-
 <!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>VMS NILAM - Packing System (Apps Script UI)</title>
+  <title>VMS NILAM - Packing System</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
@@ -317,6 +316,10 @@ function setLoginMsg(txt, severity) {
 }
 function setAwbMsg(txt, cls) {
   const el = document.getElementById('awbMsg');
+  if (!el) {
+    console.warn('awbMsg not found');
+    return;
+  }
   el.innerText = txt || '';
   el.className = cls || '';
 }
