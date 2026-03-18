@@ -1,326 +1,300 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VMS PRO - Frontend</title>
-<style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;max-width:900px;margin:20px auto;padding:0 16px;color:#111}
-  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-  h1{font-size:20px;margin:0}
-  .card{border:1px solid #e3e3e3;padding:12px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-  label{display:block;font-size:13px;margin-top:8px}
-  input,button,select,textarea{font-size:14px;padding:8px;border-radius:6px;border:1px solid #ddd;width:100%;box-sizing:border-box}
-  button{cursor:pointer}
-  #video{width:100%;max-height:360px;background:#000;border-radius:6px}
-  .row{display:flex;gap:8px}
-  .row > *{flex:1}
-  .small{font-size:13px;color:#666}
-  #progressBar{height:10px;background:#e6e6e6;border-radius:6px;overflow:hidden}
-  #progressFill{height:100%;width:0;background:#2d9cdb}
-  pre{background:#0f1724;color:#fff;padding:10px;border-radius:6px;overflow:auto}
-</style>
+  <meta charset="utf-8" />
+  <title>VMS NILAM - Packing System</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+  <style>
+    :root {
+      --bg:#0f1720;
+      --card:#0b1220;
+      --muted:#9fb0c6;
+      --accent:#ffd88a;
+      --danger:#ff6b6b;
+      --success:#8bff9a;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:#e6eef6;
+      font-family:Arial,Helvetica,sans-serif;
+    }
+    header{
+      background:#071029;
+      color:#fff;
+      padding:12px 16px;
+      text-align:center;
+      font-size:18px;
+    }
+    .wrap{
+      padding:16px;
+      max-width:1100px;
+      margin:0 auto;
+      min-height: calc(100vh - 72px);
+      box-sizing: border-box;
+    }
+    .card {
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .row { display: flex; gap:12px; flex-wrap: wrap; }
+    .col { flex:1 1 220px; min-width:220px; }
+    .actions button { margin-right:6px; margin-top:4px; }
+    input, select, button {
+      padding:6px;
+      border-radius:4px;
+      border:1px solid #444;
+      background:#121b2b;
+      color:#e6eef6;
+      font-size:14px;
+    }
+    input:focus, select:focus, button:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,216,138,0.06); }
+    table { width:100%; border-collapse:collapse; margin-top:4px; }
+    table th, table td { padding:6px 8px; text-align:left; border-bottom:1px solid #333; font-size:13px; vertical-align:middle; }
+    .timer { font-weight:bold; color:var(--accent); }
+    small.muted { color:var(--muted); font-size:12px; }
+    .muted { color:var(--muted); }
+    .status-msg { font-size:13px; margin-top:8px; }
+    .danger { color:var(--danger); }
+    .ok { color:var(--success); }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.08); border-top-color:var(--accent); border-radius:50%; animation:spin 0.9s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .invisible { display:none !important; }
+    .link-btn { background:transparent; border:1px solid #284a6b; padding:6px 8px; color:var(--accent); border-radius:4px; cursor:pointer; }
+    a.small { font-size:13px; color:var(--accent); text-decoration:none; }
+    footer.note { color:var(--muted); font-size:12px; text-align:center; margin-top:8px; }
+    video { width:100%; border-radius:4px; background:#000; }
+  </style>
 </head>
 <body>
+  <header>VMS NILAM - Packing System</header>
+  <div class="wrap">
 
-<header>
-  <h1>VMS PRO — Frontend</h1>
-  <div class="small">Demo: Camera + Chunked upload</div>
-</header>
+    <!-- LOGIN -->
+    <div id="loginCard" class="card" role="region" aria-label="Login">
+      <h3>Login</h3>
+      <form id="loginForm" autocomplete="on" novalidate>
+        <div class="row" style="align-items:center">
+          <div style="flex:1;min-width:180px">
+            <label for="username">Username</label><br/>
+            <input id="username" name="username" type="text" placeholder="username" autocomplete="username" required />
+          </div>
+          <div style="flex:1;min-width:180px">
+            <label for="password">Password</label><br/>
+            <input id="password" name="password" type="password" placeholder="password" autocomplete="current-password" required />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button id="btnLogin" type="submit">Login</button>
+          </div>
+          <div style="align-self:center;margin-left:6px"><small class="muted">Secure (server-side hashing)</small></div>
+        </div>
+      </form>
+      <div id="loginMsg" class="status-msg" role="status" aria-live="polite"></div>
+    </div>
 
-<!-- CONFIG: set your Apps Script web app URL here -->
+    <!-- MAIN UI -->
+    <div id="mainUI" class="card invisible" aria-hidden="true">
+
+      <!-- Dashboard + Leaderboard + AWB -->
+      <div class="card row">
+        <div class="col">
+          <h4>📊 Dashboard</h4>
+          <div>Packed Today: <strong id="statPacked">0</strong></div>
+          <div>AWBs Processed: <strong id="statAwb">0</strong></div>
+          <div class="actions" style="margin-top:8px">
+            <button id="btnRefreshStats" type="button" class="link-btn">Refresh</button>
+          </div>
+        </div>
+        <div class="col">
+          <h4>🏆 Leaderboard</h4>
+          <div style="max-height:220px;overflow:auto">
+            <table><thead><tr><th>Employee</th><th>Count</th></tr></thead>
+            <tbody id="leaderboardBody"></tbody></table>
+          </div>
+        </div>
+        <div class="col">
+          <h4>🔎 Search AWB</h4>
+          <div class="row">
+            <div style="flex:1">
+              <input id="searchAwb" placeholder="scan or type AWB" />
+            </div>
+            <div><button id="btnSearchAwb" type="button">Search</button></div>
+          </div>
+          <div id="searchResults" style="margin-top:8px" role="status" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- Camera & Recording -->
+      <div class="card row">
+        <div style="flex:1;min-width:320px">
+          <h4>🎥 Camera & Recording</h4>
+          <div>Employee: <strong id="loggedUser"></strong> <span id="roleBadge" class="muted"></span></div>
+
+          <div class="actions" style="margin-top:8px">
+            <button id="btnStartCam">Start Camera</button>
+            <button id="btnStopCam">Stop Camera</button>
+            <button id="btnStartRec">Start Recording</button>
+            <button id="btnStopRec">Stop Recording</button>
+            <button id="btnUpload">Upload</button>
+          </div>
+
+          <div style="margin-top:8px;max-width:520px">
+            <input id="awbInput" placeholder="Scan AWB / Manual Order" />
+            <div id="awbMsg" class="status-msg" role="status" aria-live="polite"></div>
+            <div style="margin-top:8px">Recording: <span id="recTimer" class="timer">00:00</span></div>
+          </div>
+        </div>
+
+        <div style="flex:0 0 320px;min-width:240px">
+          <video id="preview" autoplay muted playsinline></video>
+          <div style="margin-top:8px"><small class="muted">Recording preview</small></div>
+        </div>
+      </div>
+
+      <!-- Admin -->
+      <div id="adminBlock" class="card invisible">
+        <h4>👨‍💼 Admin Panel</h4>
+        <div class="row">
+          <div class="col">
+            <label>New User</label><input id="newUser" /><label>Password</label><input id="newPass" type="password" />
+            <label>Role</label><select id="newRole"><option value="user">user</option><option value="admin">admin</option></select>
+            <button id="btnCreateUser">Create</button>
+          </div>
+          <div class="col">
+            <label>Update Password</label><input id="updUser" /><label>New Password</label><input id="updPass" type="password" />
+            <button id="btnUpdPass">Update</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Videos -->
+      <div id="videosList" class="card">
+        <h4>Recent Videos</h4>
+        <div style="max-height:260px;overflow:auto">
+          <table>
+            <thead><tr><th>Employee</th><th>AWB</th><th>Start</th><th>Duration(s)</th><th>Link</th></tr></thead>
+            <tbody id="videosBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="note">Built for Apps Script backend · Keep recordings short (&lt;60s)</footer>
+    </div>
+  </div>
+
 <script>
-  const SCRIPT_URL = "https://script.google.com/a/macros/nilamind.com/s/AKfycbyjtL72R7iAsF4QbE9Q-WQlkimArEOO_mLA2_rDOZbfmoXVArkxlUsbGSjrkGxVzas1/exec"; // <-- REPLACE with your Apps Script web app URL
-  // Chunk size in bytes (recommended 300KB - 800KB). Smaller = safer for Apps Script.
-  const CHUNK_SIZE = 500 * 1024; // 500 KB
-</script>
+/* ================= CONFIG ================= */
+const API_URL = "https://script.google.com/a/macros/nilamind.com/s/AKfycbyjtL72R7iAsF4QbE9Q-WQlkimArEOO_mLA2_rDOZbfmoXVArkxlUsbGSjrkGxVzas1/exec"; // Apps Script web app exec URL
+const CHUNK_SIZE = 512*1024; // 512 KB
+const MAX_FILE_SIZE = 200*1024*1024; // 200MB
 
-<!-- LOGIN / AUTH -->
-<section class="card" id="loginCard">
-  <h3>Login</h3>
-  <label>Username</label><input id="username" placeholder="username" />
-  <label>Password</label><input id="password" type="password" placeholder="password" />
-  <div style="margin-top:10px" class="row">
-    <button id="btnLogin">Login</button>
-    <button id="btnLogout" style="display:none">Logout</button>
-  </div>
-  <div id="loginMsg" class="small"></div>
-</section>
-
-<!-- AWB Check -->
-<section class="card">
-  <h3>AWB Check</h3>
-  <div class="row">
-    <input id="awbInput" placeholder="enter AWB to check (e.g. AWB12345)" />
-    <button id="btnAwb">Check AWB</button>
-  </div>
-  <div id="awbResult" class="small"></div>
-</section>
-
-<!-- Camera & Recording -->
-<section class="card">
-  <h3>Camera & Recording</h3>
-  <video id="video" autoplay playsinline></video>
-  <div class="row" style="margin-top:8px">
-    <button id="btnStartRec">Start Recording</button>
-    <button id="btnStopRec" disabled>Stop</button>
-  </div>
-
-  <label>AWB for this video (optional)</label>
-  <input id="videoAwb" placeholder="optional awb for this recording" />
-
-  <div style="margin-top:8px" class="small">After recording, the video will be split into chunks and uploaded to the Google Apps Script backend.</div>
-
-  <div style="margin-top:10px">
-    <div id="progressBar"><div id="progressFill"></div></div>
-    <div id="uploadStatus" class="small"></div>
-  </div>
-</section>
-
-<!-- Finalize + Metadata -->
-<section class="card">
-  <h3>Finalize / Last Actions</h3>
-  <div class="row">
-    <button id="btnFinalize" disabled>Finalize Upload</button>
-    <button id="btnGetStats">Refresh Stats & Leaderboard</button>
-  </div>
-</section>
-
-<!-- Stats / Leaderboard -->
-<section class="card">
-  <h3>Stats</h3>
-  <div id="statsBox" class="small">No data yet.</div>
-  <h4 style="margin-top:8px">Leaderboard</h4>
-  <div id="leaderboardBox" class="small">No data yet.</div>
-</section>
-
-<!-- Debug -->
-<section class="card">
-  <h3>Debug / Last Response</h3>
-  <pre id="debug"></pre>
-</section>
-
-<script>
-/* ----------------- Utility ----------------- */
-function debug(v){ document.getElementById('debug').textContent = typeof v === 'string' ? v : JSON.stringify(v, null, 2); }
-function setUploadProgress(p){ document.getElementById('progressFill').style.width = (p*100) + '%'; }
-function showMsg(id, txt){ document.getElementById(id).textContent = txt; }
-
-/* ----------------- Auth ----------------- */
-let TOKEN = localStorage.getItem('vms_token') || null;
-const usernameInput = document.getElementById('username');
-const passwordInput = document.getElementById('password');
-const btnLogin = document.getElementById('btnLogin');
-const btnLogout = document.getElementById('btnLogout');
-
-function saveToken(token){
-  TOKEN = token;
-  if(token) localStorage.setItem('vms_token', token); else localStorage.removeItem('vms_token');
-  document.getElementById('btnLogout').style.display = token ? 'inline-block' : 'none';
-}
-
-async function apiPost(params){
-  // Send as application/x-www-form-urlencoded to avoid preflight
-  const body = new URLSearchParams();
-  for(const k in params){
-    const v = params[k];
-    body.append(k, (typeof v === 'object') ? JSON.stringify(v) : String(v));
-  }
-  const resp = await fetch(SCRIPT_URL, { method:'POST', body });
-  const text = await resp.text();
-  try{ return JSON.parse(text); } catch(e){ return { status:'error', message:'invalid JSON', raw:text }; }
-}
-
-btnLogin.onclick = async ()=>{
-  const u = usernameInput.value.trim(), p = passwordInput.value.trim();
-  if(!u||!p){ showMsg('loginMsg','username & password required'); return; }
-  showMsg('loginMsg','logging in...');
-  const res = await apiPost({ action:'login', username:u, password:p });
-  debug(res);
-  if(res && res.status==='success'){
-    saveToken(res.token);
-    showMsg('loginMsg','Logged in as '+res.username+' ('+res.role+')');
-    btnLogout.style.display = 'inline-block';
-  } else {
-    showMsg('loginMsg', res.message || 'Login failed');
-  }
+/* ================= STATE ================= */
+const STATE = {
+  token:null, username:null, role:null, mediaStream:null,
+  recorder:null, chunks:[], recording:false, recordStart:null,
+  timerHandle:null, autoHandles:[], awbDebounce:null
 };
 
-btnLogout.onclick = ()=>{ saveToken(null); showMsg('loginMsg','Logged out'); };
+/* ================= UTILITIES ================= */
+function setVisible(el, v){ if(!el) return; el.style.display=v?'block':'none'; el.classList.toggle('invisible',!v); el.setAttribute('aria-hidden',!v); }
+function setLoginMsg(msg,cls){ const el=document.getElementById('loginMsg'); el.innerText=msg||''; el.className='status-msg'+(cls?' '+cls:''); }
+function setAwbMsg(msg,cls){ const el=document.getElementById('awbMsg'); el.innerText=msg||''; el.className=cls||''; }
+function startTimer(){ const el=document.getElementById('recTimer'); STATE.timerHandle=setInterval(()=>{ if(!STATE.recordStart) return; const s=Math.floor((Date.now()-STATE.recordStart)/1000); el.innerText=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },300); }
+function stopTimer(){ if(STATE.timerHandle){ clearInterval(STATE.timerHandle); STATE.timerHandle=null; } document.getElementById('recTimer').innerText='00:00'; }
+function escapeHtml(str){ if(!str && str!==0) return ''; return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 
-/* ----------------- AWB Check ----------------- */
-document.getElementById('btnAwb').onclick = async ()=>{
-  const awb = document.getElementById('awbInput').value.trim();
-  if(!awb){ showMsg('awbResult','Enter AWB'); return; }
-  const res = await apiPost({ action:'checkAwb', q: awb, awb });
-  debug(res);
-  showMsg('awbResult', res.exists ? 'AWB already exists (duplicate)' : 'AWB is new');
-};
+/* ================= API WRAPPER ================= */
+async function api(action,data={},opts={timeout:15000}){
+  const body=JSON.stringify({...data,action});
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),opts.timeout);
+  const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,signal:ctrl.signal});
+  clearTimeout(timer);
+  if(!res.ok) throw new Error(res.statusText);
+  return await res.json();
+}
 
-/* ----------------- Camera & Recording ----------------- */
-const videoEl = document.getElementById('video');
-let mediaStream = null, mediaRecorder = null, recordedChunks = [];
-
-async function startCamera(){
+/* ================= LOGIN ================= */
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  if(!u||!p){ setLoginMsg('username/password required','danger'); return; }
+  setLoginMsg('Signing in...');
   try{
-    mediaStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-    videoEl.srcObject = mediaStream;
-  }catch(err){
-    alert("Camera access failed: " + err.message);
-  }
-}
-startCamera();
+    const r=await api('login',{username:u,password:p});
+    if(r.status==='success'){
+      STATE.token=r.token; STATE.username=r.username; STATE.role=r.role;
+      document.getElementById('loggedUser').innerText=STATE.username;
+      document.getElementById('roleBadge').innerText=STATE.role==='admin'?'admin':'';
+      setVisible(document.getElementById('loginCard'),false);
+      setVisible(document.getElementById('mainUI'),true);
+      if(STATE.role==='admin') setVisible(document.getElementById('adminBlock'),true);
+      loadStats(); loadLeaderboard(); loadRecentVideos();
+    } else setLoginMsg(r.message||'Login failed','danger');
+  }catch(e){ setLoginMsg('Login error','danger'); console.error(e);}
+});
 
-document.getElementById('btnStartRec').onclick = ()=>{
-  if(!mediaStream){ alert('No camera'); return; }
-  recordedChunks = [];
-  mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp8,opus' });
-  mediaRecorder.ondataavailable = e => { if(e.data && e.data.size>0) recordedChunks.push(e.data); };
-  mediaRecorder.onstop = onRecordingStop;
-  mediaRecorder.start();
-  document.getElementById('btnStartRec').disabled = true;
-  document.getElementById('btnStopRec').disabled = false;
-  showMsg('uploadStatus','Recording...');
-  setUploadProgress(0);
-};
+/* ================= STATS / LEADERBOARD / VIDEOS ================= */
+async function loadStats(){ try{ const r=await api('getStats',{token:STATE.token}); if(r){ document.getElementById('statPacked').innerText=r.packedToday||0; document.getElementById('statAwb').innerText=r.awbsProcessed||0; } }catch(e){console.error(e);} }
+async function loadLeaderboard(){ try{ const r=await api('getLeaderboard',{token:STATE.token}); const body=document.getElementById('leaderboardBody'); body.innerHTML=''; if(r&&Array.isArray(r.leaderboard)) r.leaderboard.forEach(it=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(it.employee)}</td><td>${escapeHtml(it.count)}</td>`; body.appendChild(tr); }); }catch(e){console.error(e);} }
+async function loadRecentVideos(){ try{ const r=await api('getVideos',{token:STATE.token}); const body=document.getElementById('videosBody'); body.innerHTML=''; if(r&&r.status==='success'){ r.videos.slice().reverse().slice(0,50).forEach(v=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${escapeHtml(v.employee)}</td><td>${escapeHtml(v.awb||'')}</td><td>${escapeHtml(v.startTime||'')}</td><td>${Number(v.durationSec)||0}</td><td><a href="${v.fileUrl}" target="_blank">view</a></td>`; body.appendChild(tr); }); } }catch(e){console.error(e);} }
 
-document.getElementById('btnStopRec').onclick = ()=>{
-  if(mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-  document.getElementById('btnStartRec').disabled = false;
-  document.getElementById('btnStopRec').disabled = true;
-};
+/* ================= AWB DUPLICATE CHECK ================= */
+document.getElementById('awbInput').addEventListener('blur',()=>{ if(STATE.awbDebounce) clearTimeout(STATE.awbDebounce); STATE.awbDebounce=setTimeout(checkAwb,200); });
+async function checkAwb(){ const v=(document.getElementById('awbInput').value||'').trim(); if(!v){ setAwbMsg('',''); return; } try{ const r=await api('checkAwb',{awb:v,token:STATE.token}); if(r.exists) setAwbMsg('Duplicate AWB!','danger'); else setAwbMsg('AWB OK','ok'); }catch(e){ setAwbMsg('AWB check error','danger'); } }
 
-let lastUploadId = null;
-async function onRecordingStop(){
-  showMsg('uploadStatus','Recording stopped. Preparing upload...');
-  const blob = new Blob(recordedChunks, { type: 'video/webm' });
-  const startTime = new Date().toISOString();
-  // split blob into slices
-  const totalSize = blob.size;
-  const slices = [];
-  let offset = 0, index = 0;
-  while(offset < totalSize){
-    const end = Math.min(offset + CHUNK_SIZE, totalSize);
-    slices.push({ index: index++, blob: blob.slice(offset, end) });
-    offset = end;
-  }
+/* ================= CAMERA / RECORDING ================= */
+const preview=document.getElementById('preview');
+document.getElementById('btnStartCam').addEventListener('click',async()=>{
+  if(STATE.mediaStream) return;
+  try{ STATE.mediaStream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,frameRate:15},audio:true}); preview.srcObject=STATE.mediaStream; }catch(e){alert('Camera permission required');}
+});
+document.getElementById('btnStopCam').addEventListener('click',()=>{
+  if(!STATE.mediaStream) return;
+  STATE.mediaStream.getTracks().forEach(t=>t.stop());
+  STATE.mediaStream=null; preview.srcObject=null;
+});
+document.getElementById('btnStartRec').addEventListener('click',()=>{
+  if(!STATE.mediaStream) { alert('Start camera first'); return; }
+  if(STATE.recording) { alert('Already recording'); return; }
+  STATE.chunks=[]; STATE.recordStart=new Date();
+  STATE.recorder=new MediaRecorder(STATE.mediaStream,{mimeType:'video/webm;codecs=vp8'}); 
+  STATE.recorder.ondataavailable=e=>{ if(e.data&&e.data.size) STATE.chunks.push(e.data); };
+  STATE.recorder.onstop=()=>{ STATE.recording=false; stopTimer(); };
+  STATE.recorder.start(1000); STATE.recording=true; startTimer(); setAwbMsg('Recording...','ok');
+});
+document.getElementById('btnStopRec').addEventListener('click',()=>{ if(STATE.recorder&&STATE.recording){ STATE.recorder.stop(); STATE.recording=false; setAwbMsg('Recording stopped',''); } });
 
-  // create unique uploadId
-  const uploadId = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
-  lastUploadId = uploadId;
-
-  // send slices sequentially
-  for(let i=0;i<slices.length;i++){
-    const s = slices[i];
-    showMsg('uploadStatus', `Uploading chunk ${i+1}/${slices.length} ...`);
-    setUploadProgress(i/slices.length);
-    // convert slice to base64 via FileReader and then send as URLSearchParams (no preflight)
-    await sendSliceAsBase64(uploadId, s.blob, s.index);
-  }
-  setUploadProgress(1);
-  showMsg('uploadStatus', 'All chunks uploaded. Call Finalize to merge and save.');
-  document.getElementById('btnFinalize').disabled = false;
-
-  // store start/end candidate times for finalize
-  // we'll set endTime to now when finalizing
-  window._last_upload_meta = { uploadId, filename: `video_${Date.now()}.webm`, awb:document.getElementById('videoAwb').value.trim(), startTime };
-  debug({ message:'Uploaded slices', uploadId, slicesCount: slices.length, size: totalSize });
-}
-
-function readBlobAsBase64(blob){
-  return new Promise((resolve, reject)=>{
-    const fr = new FileReader();
-    fr.onloadend = ()=> resolve(fr.result.split(',')[1]); // data:*/*;base64,XXXX
-    fr.onerror = reject;
-    fr.readAsDataURL(blob);
-  });
-}
-
-async function sendSliceAsBase64(uploadId, blobSlice, index){
-  // read as base64
-  const b64 = await readBlobAsBase64(blobSlice);
-  // prepare URLSearchParams (application/x-www-form-urlencoded) => no preflight
-  const params = new URLSearchParams();
-  params.append('action','uploadChunk');
-  params.append('uploadId', uploadId);
-  params.append('index', String(index));
-  params.append('data', b64);
-  if(TOKEN) params.append('token', TOKEN);
-
-  // POST
-  const resp = await fetch(SCRIPT_URL, { method: 'POST', body: params });
-  const txt = await resp.text();
-  let json;
-  try{ json = JSON.parse(txt); } catch(e){ json = { status:'error', message:'Invalid JSON', raw:txt }; }
-  debug(json);
-  if(!json || json.status !== 'ok') {
-    throw new Error('Chunk upload failed: ' + (json && json.message ? json.message : JSON.stringify(json)));
-  }
-  return json;
-}
-
-/* ----------------- Finalize Upload ----------------- */
-document.getElementById('btnFinalize').onclick = async ()=>{
-  if(!window._last_upload_meta){ alert('No upload in progress'); return; }
-  const meta = window._last_upload_meta;
-  const endTime = new Date().toISOString();
-  const params = new URLSearchParams();
-  params.append('action','finalizeUpload');
-  params.append('uploadId', meta.uploadId);
-  params.append('filename', meta.filename);
-  params.append('awb', meta.awb || '');
-  params.append('startTime', meta.startTime);
-  params.append('endTime', endTime);
-  if(TOKEN) params.append('token', TOKEN);
-
-  showMsg('uploadStatus','Finalizing upload...');
-  const res = await fetch(SCRIPT_URL, { method:'POST', body: params });
-  const text = await res.text();
-  let json;
-  try{ json = JSON.parse(text); } catch(e){ json = { status:'error', message:'Invalid JSON', raw:text }; }
-  debug(json);
-  if(json && json.status === 'success'){
-    showMsg('uploadStatus','Upload finalized: ' + json.filename);
-    // reset
-    document.getElementById('btnFinalize').disabled = true;
-    window._last_upload_meta = null;
-    // refresh stats
-    await loadStatsAndLeaderboard();
-  } else {
-    showMsg('uploadStatus','Finalize failed: ' + (json && json.message ? json.message : 'unknown'));
-  }
-};
-
-/* ----------------- Stats & Leaderboard ----------------- */
-async function loadStatsAndLeaderboard(){
-  // stats
-  const statRes = await apiPost({ action:'getStats', token: TOKEN || '' });
-  debug(statRes);
-  if(statRes && statRes.packedToday !== undefined){
-    showMsg('statsBox', `Packed Today: ${statRes.packedToday}\nAWBs Processed: ${statRes.awbsProcessed}\nActive Uploads: ${statRes.activeUploads}`);
-  } else {
-    showMsg('statsBox', JSON.stringify(statRes));
-  }
-
-  // leaderboard
-  const lbRes = await apiPost({ action:'getLeaderboard', token: TOKEN || '' });
-  if(lbRes && lbRes.status === 'success'){
-    const rows = lbRes.leaderboard.map(r => `${r.employee}: ${r.count}`).join('\n');
-    showMsg('leaderboardBox', rows || 'No entries');
-  } else {
-    showMsg('leaderboardBox', JSON.stringify(lbRes));
-  }
-}
-document.getElementById('btnGetStats').onclick = loadStatsAndLeaderboard;
-
-/* ----------------- Init ----------------- */
-(function init(){
-  if(TOKEN) showMsg('loginMsg','Token stored. You are logged in.');
-  else showMsg('loginMsg','Not logged in.');
-  document.getElementById('btnLogout').style.display = TOKEN ? 'inline-block' : 'none';
-  setUploadProgress(0);
-  loadStatsAndLeaderboard().catch(()=>{});
-})();
+/* ================= UPLOAD ================= */
+document.getElementById('btnUpload').addEventListener('click',async()=>{
+  if(!STATE.token) return alert('Login required');
+  if(!STATE.chunks.length) return alert('No recording found');
+  const awb=(document.getElementById('awbInput').value||'').trim();
+  if(!awb&& !confirm('No AWB entered. Upload as manual?')) return;
+  try{
+    const chk=await api('checkAwb',{awb,token:STATE.token});
+    if(chk.exists) return alert('Duplicate AWB detected!');
+  }catch(e){ console.warn('AWB check failed',e); }
+  const blob=new Blob(STATE.chunks,{type:'video/webm'}); if(blob.size>MAX_FILE_SIZE) return alert('Video too large');
+  const uploadId=`${STATE.username}_${Date.now()}`, totalChunks=Math.ceil(blob.size/CHUNK_SIZE);
+  try{
+    for(let i=0;i<totalChunks;i++){
+      const slice=blob.slice(i*CHUNK_SIZE,(i+1)*CHUNK_SIZE);
+      const b64=await new Promise(res=>{ const fr=new FileReader(); fr.onloadend=()=>res(fr.result.split(',')[1]||''); fr.readAsDataURL(slice); });
+      await api('uploadChunk',{token:STATE.token,uploadId,index:i,total:totalChunks,data:b64},{timeout:30000});
+    }
+    await api('finalizeUpload',{token:STATE.token,uploadId,filename:`${STATE.username}_${awb||'manual'}_${new Date().toISOString().replace(/[:.]/g,'-')}.webm`,awb,startTime:STATE.recordStart.toISOString(),endTime:new Date().toISOString()});
+    alert('Upload success'); STATE.chunks=[]; STATE.recordStart=null; stopTimer(); document.getElementById('awbInput').value=''; setAwbMsg('',''); loadStats(); loadLeaderboard(); loadRecentVideos();
+  }catch(e){ console.error(e); alert('Upload failed'); setAwbMsg('Upload failed','danger'); }
+});
 </script>
 </body>
 </html>
