@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html>
 <head>
@@ -8,121 +6,80 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 
- <style>
-:root {
-  --bg:#0f1720;
-  --card:#0b1220;
-  --muted:#9fb0c6;
-  --accent:#ffd88a;
-  --danger:#ff6b6b;
-  --success:#8bff9a;
-}
+  <style>
+    :root {
+      --bg:#0f1720;
+      --card:#0b1220;
+      --muted:#9fb0c6;
+      --accent:#ffd88a;
+      --danger:#ff6b6b;
+      --success:#8bff9a;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      padding:0;
+      background:var(--bg);
+      color:#e6eef6;
+      font-family:Arial,Helvetica,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    header{
+      background:#071029;
+      color:#fff;
+      padding:12px 16px;
+      text-align:center;
+      font-size:18px;
+    }
+    .wrap{
+      padding:16px;
+      max-width:1100px;
+      margin:0 auto;
+      min-height: calc(100vh - 72px);
+      box-sizing: border-box;
+    }
 
-html,body{
-  height:100%;
-  margin:0;
-  padding:0;
-  background:var(--bg);
-  color:#e6eef6;
-  font-family:Arial,Helvetica,sans-serif;
-}
+    /* ===== Card / Layout ===== */
+    .card {
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .row { display: flex; gap:12px; flex-wrap: wrap; }
+    .col { flex:1 1 220px; min-width:220px; }
+    .actions button { margin-right:6px; margin-top:4px; }
+    input, select, button {
+      padding:6px;
+      border-radius:4px;
+      border:1px solid #444;
+      background:#121b2b;
+      color:#e6eef6;
+      font-size:14px;
+    }
+    input:focus, select:focus, button:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,216,138,0.06); }
+    table { width:100%; border-collapse:collapse; margin-top:4px; }
+    table th, table td { padding:6px 8px; text-align:left; border-bottom:1px solid #333; font-size:13px; vertical-align:middle; }
+    .timer { font-weight:bold; color:var(--accent); }
+    small.muted { color:var(--muted); font-size:12px; }
+    .muted { color:var(--muted); }
+    .status-msg { font-size:13px; margin-top:8px; }
+    .danger { color:var(--danger); }
+    .ok { color:var(--success); }
 
-/* Header */
-header{
-  background:#071029;
-  color:#fff;
-  padding:12px 16px;
-  text-align:center;
-  font-size:18px;
-}
+    /* inline spinner */
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.08); border-top-color:var(--accent); border-radius:50%; animation:spin 0.9s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
-/* Layout */
-.wrap{
-  padding:16px;
-  max-width:1100px;
-  margin:0 auto;
-}
-
-/* Cards */
-.card {
-  background: var(--card);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-/* 🔥 ALIGNMENT FIX */
-.row { 
-  display: flex; 
-  gap:12px; 
-  flex-wrap: wrap; 
-  align-items: stretch;
-}
-
-.col { 
-  flex:1 1 220px; 
-  min-width:220px;
-  display:flex;
-  flex-direction:column;
-}
-
-/* Inputs */
-input, select, button {
-  padding:6px;
-  border-radius:4px;
-  border:1px solid #444;
-  background:#121b2b;
-  color:#e6eef6;
-}
-
-/* Table */
-table { width:100%; border-collapse:collapse; }
-table th, table td { 
-  padding:6px 8px; 
-  border-bottom:1px solid #333; 
-  font-size:13px; 
-}
-
-/* Status */
-.muted { color:var(--muted); }
-.danger { color:var(--danger); }
-.ok { color:var(--success); }
-
-/* 🔥 REMOVE BLACK BUG */
-.invisible { display:none; }
-
-/* 🔥 SKY BLUE LINKS */
-a {
-  color:#38bdf8;
-  text-decoration:none;
-}
-a:hover {
-  color:#7dd3fc;
-}
-
-/* Buttons */
-.link-btn { 
-  background:transparent; 
-  border:1px solid #284a6b; 
-  color:#38bdf8; 
-  padding:6px 8px; 
-  border-radius:4px; 
-  cursor:pointer;
-}
-
-/* Small link */
-a.small { 
-  font-size:13px; 
-  color:#38bdf8; 
-}
-
-/* Footer */
-footer.note { 
-  color:var(--muted); 
-  font-size:12px; 
-  text-align:center; 
-}
-</style>
+    /* hidden helper: we use JS-preserved display, avoid layout collapse */
+    .invisible { display:none !important; }
+    .link-btn { background:transparent; border:1px solid #284a6b; padding:6px 8px; color:var(--accent); border-radius:4px; cursor:pointer; }
+    a.small { font-size:13px; color:var(--accent); text-decoration:none; }
+    .small-muted { color:var(--muted); font-size:12px; }
+    footer.note { color:var(--muted); font-size:12px; text-align:center; margin-top:8px; }
+  </style>
 </head>
 <body>
   <header>VMS NILAM - Packing System (Apps Script UI)</header>
@@ -467,25 +424,17 @@ document.getElementById('btnSearchAwb').addEventListener('click', async ()=>{
   const area = document.getElementById('searchResults');
   area.innerHTML = '';
   if (!q) return;
-
   try{
-    const r = await api('searchByAwb', { token: STATE.token, q: q });
-    console.log('Search response:', r);
-
-    if (r && r.status === 'success' && Array.isArray(r.results) && r.results.length){
-      r.results.forEach(h => {
+    const r = await api('searchByAwb', { token: STATE.token, awb: q });
+    if (r && r.status === 'success' && Array.isArray(r.hits) && r.hits.length) {
+      r.hits.forEach(h => {
         const div = document.createElement('div');
         div.innerHTML = `<strong>${escapeHtml(h.awb)}</strong> by ${escapeHtml(h.employee)} — <a class="small" href="${h.fileUrl}" target="_blank" rel="noopener">view</a> (${h.durationSec||0}s)`;
         area.appendChild(div);
       });
-
-    } else if (r && r.status === 'error') {
-      area.innerText = 'Error: ' + r.message;
-
     } else {
       area.innerText = 'No results';
     }
-
   } catch(e){
     area.innerText = 'Search error: ' + String(e);
     console.error('searchByAwb error', e);
