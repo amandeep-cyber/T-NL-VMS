@@ -8,34 +8,37 @@
 
   <style>
     :root {
-      --bg:#0f1720;
-      --card:#0b1220;
-      --muted:#9fb0c6;
-      --accent:#87CEEB; /* skyblue accent */
-      --danger:#ff6b6b;
-      --success:#8bff9a;
+      --bg: #f0f8ff;          /* light background */
+      --card: #ffffff;         /* white cards */
+      --muted: #6c757d;        /* muted text */
+      --accent: #87CEEB;       /* skyblue accent */
+      --danger: #ff6b6b;
+      --success: #28a745;
+      --border: #c0d6e4;       /* light border for inputs/cards */
     }
-    html,body{
-      height:100%;
-      margin:0;
-      padding:0;
-      background:var(--bg);
-      color:#e6eef6;
-      font-family:Arial,Helvetica,sans-serif;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: #212529;
+      font-family: Arial, Helvetica, sans-serif;
     }
-    header{
-      background:#071029;
-      color:#fff;
-      padding:12px 16px;
-      text-align:center;
-      font-size:18px;
+
+    header {
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .wrap{
-      padding:16px;
-      max-width:1100px;
-      margin:0 auto;
+
+    .wrap {
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
       min-height: calc(100vh - 72px);
       box-sizing: border-box;
     }
@@ -46,43 +49,55 @@
       padding: 12px 16px;
       border-radius: 8px;
       margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
     }
-    .row { display: flex; gap:12px; flex-wrap: wrap; }
-    .col { flex:1 1 220px; min-width:220px; }
-    .actions button { margin-right:6px; margin-top:4px; }
+
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .col { flex: 1 1 220px; min-width: 220px; }
+    .actions button { margin-right: 6px; margin-top: 4px; }
+
     input, select, button {
-      padding:6px;
-      border-radius:4px;
-      border:1px solid #284a6b;
-      background:#081422;
-      color:#e6eef6;
-      font-size:14px;
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #212529;
+      font-size: 14px;
     }
-    input:focus, select:focus, button:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(135,206,235,0.06); }
-    table { width:100%; border-collapse:collapse; margin-top:4px; }
-    table th, table td { padding:6px 8px; text-align:left; border-bottom:1px solid #0f2230; font-size:13px; vertical-align:middle; }
-    .timer { font-weight:bold; color:var(--accent); }
-    small.muted { color:var(--muted); font-size:12px; }
-    .muted { color:var(--muted); }
-    .status-msg { font-size:13px; margin-top:8px; }
-    .danger { color:var(--danger); }
-    .ok { color:var(--success); }
+
+    input:focus, select:focus, button:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(135, 206, 235, 0.3);
+    }
+
+    button { cursor: pointer; background: var(--accent); color: #fff; border: none; }
+    .link-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    table th, table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 13px; vertical-align: middle; }
+
+    .timer { font-weight: bold; color: var(--accent); }
+    small.muted { color: var(--muted); font-size: 12px; }
+    .muted { color: var(--muted); }
+    .status-msg { font-size: 13px; margin-top: 8px; }
+    .danger { color: var(--danger); }
+    .ok { color: var(--success); }
 
     /* inline spinner */
-    .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.08); border-top-color:var(--accent); border-radius:50%; animation:spin 0.9s linear infinite; vertical-align:middle; margin-right:6px; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .invisible { display:none !important; }
-    .link-btn { background:transparent; border:1px solid #284a6b; padding:6px 8px; color:var(--accent); border-radius:4px; cursor:pointer; }
-    a.small { font-size:13px; color:var(--accent); text-decoration:none; }
-    .small-muted { color:var(--muted); font-size:12px; }
-    footer.note { color:var(--muted); font-size:12px; text-align:center; margin-top:8px; }
+    .invisible { display: none !important; }
 
-    /* small responsive tweaks */
+    a.small { font-size: 13px; color: var(--accent); text-decoration: none; }
+    .small-muted { color: var(--muted); font-size: 12px; }
+    footer.note { color: var(--muted); font-size: 12px; text-align: center; margin-top: 8px; }
+
     @media (max-width:720px){
-      .row{flex-direction:column;}
-      .col{min-width:100%;}
+      .row{ flex-direction: column; }
+      .col{ min-width: 100%; }
     }
   </style>
 </head>
